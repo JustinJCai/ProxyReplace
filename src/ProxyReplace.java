@@ -44,6 +44,7 @@ public class ProxyReplace {
 	            fw.close();
 	         }
 		}*/
+		/*
 		// Oxy
 		try {
 		    List<String> proxyInput = Files.readAllLines(Paths.get("input.txt"));
@@ -53,6 +54,23 @@ public class ProxyReplace {
 		    for (String proxy : proxyInput) {
 		    	String[] pieces = proxy.split(":");
 		    	proxyOutput.add(pieces[0] + ":" + pieces[1] + ":" + newUser + ":" + newPass);
+		    }
+		    Path outputPath = Paths.get("output.txt");
+		    Files.write(outputPath, proxyOutput);
+		} catch (IOException ex) {
+		    ex.printStackTrace();
+		}
+		*/
+		// Netnut
+		try {
+		    List<String> proxyInput = Files.readAllLines(Paths.get("input.txt"));
+		    List<String> proxyOutput = new ArrayList<String>();
+		    String newUser = "ndwjdis";
+		    String newPass = "2139ikv09sd";
+		    for (String proxy : proxyInput) {
+		    	String[] pieces = proxy.split(":");
+		    	String session = pieces[2].split("!")[1];
+		    	proxyOutput.add(pieces[0] + ":" + pieces[1] + ":" + newUser + "!" + session + ":" + newPass);
 		    }
 		    Path outputPath = Paths.get("output.txt");
 		    Files.write(outputPath, proxyOutput);

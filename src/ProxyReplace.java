@@ -15,17 +15,25 @@ import java.util.Arrays;
 import java.util.List;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
-public class ProxyReplace extends JFrame {
+public class ProxyReplace extends JFrame implements ActionListener {
+	//Instantiating Status
+		String status = "Enter the proxy list and the User:Pass and then hit Run";
+	
 	// Instantiating all Components
 	JPanel topLeft = new JPanel();
 	JLabel ogLabel = new JLabel("Original Proxy List");
-	JTextArea ogTextArea = new JTextArea(10,30);
+	JTextArea ogTextArea = new JTextArea(10,35);
 	
 	JPanel topRight = new JPanel();
 	JLabel newLabel = new JLabel("Updated Proxy List");
-	JTextArea newTextArea = new JTextArea(10,30);
+	JTextArea newTextArea = new JTextArea(10,35);
 	
 	JPanel bottomLeft = new JPanel();
 	JLabel userPassLabel = new JLabel("User:Pass");
@@ -33,7 +41,7 @@ public class ProxyReplace extends JFrame {
 	JButton saveButton = new JButton("Save");
 	
 	JPanel bottomRight = new JPanel();
-	JLabel status = new JLabel("Status:");
+	JLabel statusLabel = new JLabel("Status: " + status);
 	JButton copyButton = new JButton("Copy");
 	JButton runButton = new JButton("Run");
 	
@@ -42,7 +50,7 @@ public class ProxyReplace extends JFrame {
 	public ProxyReplace() {
 		// Instantiating window
 		super("Proxy Replace");
-		setSize(800,600);
+		setSize(900,600);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(new BorderLayout(0,10));
@@ -55,8 +63,14 @@ public class ProxyReplace extends JFrame {
 		newTextArea.setLineWrap(true);
 		
 		bottomLeft.setLayout(new BorderLayout(15,10));
+		saveButton.setActionCommand("save");
+		saveButton.addActionListener(this);
 		
 		bottomRight.setLayout(new BorderLayout(35,5));
+		copyButton.setActionCommand("copy");
+		copyButton.addActionListener(this);
+		runButton.setActionCommand("run");
+		runButton.addActionListener(this);
 		
 		bottom.setLayout(new GridLayout(1,2,110,0));
 		
@@ -73,7 +87,7 @@ public class ProxyReplace extends JFrame {
 		
 		bottomRight.add(copyButton, BorderLayout.NORTH);
 		bottomRight.add(runButton, BorderLayout.CENTER);
-		bottomRight.add(status, BorderLayout.SOUTH);
+		bottomRight.add(statusLabel, BorderLayout.SOUTH);
 		
 		bottom.add(bottomLeft);
 		bottom.add(bottomRight);
@@ -86,42 +100,8 @@ public class ProxyReplace extends JFrame {
 		setVisible(true);
 	}
 	
-	public static void main (String[] args) throws IOException {
-		new ProxyReplace();
-		/*FileReader fr = null;
-		FileWriter fw = null;
-		try {
-			fr = new FileReader("input.txt");
-			fw = new FileWriter("output.txt");
-			//System.out.println(fr.ready());
-			String user = "ndwjdis";
-			String pass = "2139ikv09sd";
-			int state = fr.read();
-			String line = "";
-			// 1310 is character code for new line
-			while (state != -1) {
-				char letter = (char)state;
-				if (state != (1310)) {
-					line = line.concat(Character.toString(letter));
-					//System.out.println(line);
-				} else {
-					System.out.println("new line");
-					fw.write(line + "test");
-					line = "";
-				}
-				System.out.print(state);
-				state = fr.read();
-			}
-			fw.write(line + "test");
-		}
-		finally {
-	         if (fr != null) {
-	            fr.close();
-	         }
-	         if (fw != null) {
-	            fw.close();
-	         }
-		}*/
+	public static void main(String[] args) throws IOException {
+		ProxyReplace p = new ProxyReplace();
 		/*
 		// Oxy
 		try {
@@ -158,4 +138,80 @@ public class ProxyReplace extends JFrame {
 		}
 		*/
 	}
+	
+	public void run() {
+		if (userPassTextField.getSelectionEnd() == 0) { // Checks if TextField is empty
+			status = "Enter user:pass and try again";
+			return;
+		}
+		if (ogTextArea.getSelectionEnd() == 0) {
+			status = "Enter proxy input and try again";
+			return;
+		}
+		if (isNetnut()) {
+			newTextArea.setText(convertNetnut());
+		} else {
+			newTextArea.setText(convertOxy());
+		}
+		status = "Proxies replaced";
+	}
+	
+	public void copy() {
+		String outputList = newTextArea.getText();
+		StringSelection stringSelection = new StringSelection(outputList);
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(stringSelection, null);
+		status = "Copied to clipboard";
+	}
+	
+	public void save() { // INCOMPLETE
+		status = "User:Pass saved to file";
+	}
+	
+	public boolean isNetnut() { // INCOMPLETE
+		return false;
+	}
+	
+	public String convertOxy() { // NEEDS ERROR HANDLING
+		String[] proxyInput = ogTextArea.getText().split("\\R");
+		String proxyOutput = "";
+		String[] userPassInput = userPassTextField.getText().split(":");
+	    String newUser = userPassInput[0];
+	    String newPass = userPassInput[1];
+	    for (String proxy : proxyInput) {
+	    	String[] pieces = proxy.split(":");
+	    	proxyOutput += pieces[0] + ":" + pieces[1] + ":" + newUser + ":" + newPass + "\n";
+	    }
+	    return proxyOutput;
+	}
+	
+	public String convertNetnut() { // INCOMPLETE
+		return "";
+	}
+	
+	public void updateStatus() {
+		statusLabel.setText("Status: " + status);
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		if ("run".equals(e.getActionCommand())) {
+			run();
+			updateStatus();
+			repaint();
+			return;
+		}
+		if ("copy".equals(e.getActionCommand())) {
+			copy();
+			updateStatus();
+			repaint();
+			return;
+		}
+		if ("save".equals(e.getActionCommand())) {
+			save();
+			updateStatus();
+			repaint();
+			return;
+		}
+	}
+	
 }
